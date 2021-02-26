@@ -1,4 +1,4 @@
-module github.com/Sora233/LoliconApiPool
+module github.com/Sora233/LoliconApi-Pool
 
 go 1.13
 

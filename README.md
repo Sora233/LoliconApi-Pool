@@ -15,7 +15,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/Sora233/LoliconApiPool"
+	"github.com/Sora233/LoliconApi-Pool"
 	"image"
 	"io/ioutil"
 )

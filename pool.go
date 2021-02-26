@@ -2,7 +2,6 @@ package loliconApiPool
 
 import (
 	"container/list"
-	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"sync"
@@ -232,7 +231,7 @@ func (pool *LoliconPool) Get(options ...OptionFunc) ([]*Setu, error) {
 
 func NewLoliconPool(config *Config) (*LoliconPool, error) {
 	if config.ApiKey == "" {
-		return nil, errors.New("empty api key")
+		logger.Debugf("empty api key, usage will be limited")
 	}
 	if config.CacheMin <= 0 {
 		config.CacheMin = 0
