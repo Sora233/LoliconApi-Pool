@@ -184,9 +184,9 @@ func (pool *LoliconPool) Get(options ...OptionFunc) ([]*Setu, error) {
 	}
 
 	var (
-		r18     R18Type
+		r18     = R18Off
 		keyword string
-		num     int
+		num     = 1
 	)
 	for k, v := range option {
 		switch k {

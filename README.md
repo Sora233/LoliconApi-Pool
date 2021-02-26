@@ -15,23 +15,30 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/Sora233/LoliconApi-Pool"
+	loliconApiPool "github.com/Sora233/LoliconApi-Pool"
+	"github.com/sirupsen/logrus"
 	"image"
 	"io/ioutil"
+	"os"
 )
 
 func main() {
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.DebugLevel)
 	pool, err := loliconApiPool.NewLoliconPool(&loliconApiPool.Config{
-		ApiKey:   "your api key",
-		CacheMin: 5,
-		CacheMax: 20,
+		ApiKey:   "", // use your api key here
+		CacheMin: 0,
+		CacheMax: 1,
 		Persist:  loliconApiPool.NewNilPersist(),
 	})
 	if err != nil {
 		panic(err)
 	}
 	// use the pool
-	img, err := pool.Get(loliconApiPool.R18Option(loliconApiPool.R18Off))
+	img, err := pool.Get(
+		loliconApiPool.NumOption(1),
+		loliconApiPool.R18Option(loliconApiPool.R18Off),
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -40,6 +47,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		if len(b) == 0 {
+			continue
+		}
 		_, suf, err := image.DecodeConfig(bytes.NewReader(b))
 		if err != nil {
 			panic(err)
@@ -47,4 +57,5 @@ func main() {
 		ioutil.WriteFile(fmt.Sprintf("%v.%v", i.Pid, suf), b, 0644)
 	}
 }
+
 ```
