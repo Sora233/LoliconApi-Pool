@@ -6,9 +6,9 @@ an image pool for [LoliconApi](https://api.lolicon.app) in Golang
 
 - [x] Always request 10 image, cache unused ones.
 - [x] Support Keyword
- 
+
 ## Usage
- 
+
 ```go
 package main
 
@@ -18,6 +18,9 @@ import (
 	loliconApiPool "github.com/Sora233/LoliconApi-Pool"
 	"github.com/sirupsen/logrus"
 	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/ioutil"
 	"os"
 )
@@ -50,11 +53,14 @@ func main() {
 		if len(b) == 0 {
 			continue
 		}
-		_, suf, err := image.DecodeConfig(bytes.NewReader(b))
+		_, cfg, err := image.DecodeConfig(bytes.NewReader(b))
 		if err != nil {
-			panic(err)
+			logrus.Errorf("unknown format")
+			continue
 		}
-		ioutil.WriteFile(fmt.Sprintf("%v.%v", i.Pid, suf), b, 0644)
+		filename := fmt.Sprintf("%v.%v", i.Pid, cfg)
+		ioutil.WriteFile(filename, b, 0644)
+		logrus.WithField("filename", filename).Info("saved")
 	}
 }
 
