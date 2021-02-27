@@ -1,10 +1,12 @@
 package loliconApiPool
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Sora233/requests"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -12,6 +14,10 @@ import (
 )
 
 const Host = "https://api.lolicon.app/setu"
+
+var c = &http.Client{
+	Timeout: time.Second * 60,
+}
 
 type R18Type int
 
@@ -60,11 +66,11 @@ func (s *Setu) Content() ([]byte, error) {
 	if s == nil {
 		return nil, errors.New("<nil>")
 	}
-	resp, err := requests.Get(s.Url)
+	resp, err := c.Get(s.Url)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Content(), nil
+	return ioutil.ReadAll(resp.Body)
 }
 
 type Response struct {
@@ -88,23 +94,34 @@ func LoliconAppSetu(apikey string, R18 R18Type, keyword string, num int) (*Respo
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-	req := requests.RequestsWithContext(ctx)
-	resp, err := req.Get(Host, params)
+	req, err := http.NewRequest(http.MethodGet, Host, nil)
+	if err != nil {
+		return nil, err
+	}
+	q := make(url.Values)
+	for k, v := range params {
+		q.Add(k, v)
+	}
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	apiResp := new(Response)
-	err = resp.Json(apiResp)
+	bodyb, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(bodyb, &apiResp)
 	if err != nil {
 		return nil, err
 	}
 	return apiResp, nil
 }
 
-func ToParams(get interface{}) (requests.Params, error) {
-	params := make(requests.Params)
+func ToParams(get interface{}) (map[string]string, error) {
+	params := make(map[string]string)
 
 	rg := reflect.ValueOf(get)
 	if rg.Type().Kind() == reflect.Ptr {
